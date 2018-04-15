@@ -74,26 +74,31 @@ namespace alismstool
             public string time { get; set; }
             public override string ToString()
             {
-                JObject jObject = new JObject();
-                jObject.Add("phone", phone);
-                jObject.Add("content", content);
-                jObject.Add("time", time);
-                return jObject.ToString();
+                string re = string.Format("{0},{1},{2}", phone, content, time);
+                //JObject jObject = new JObject();
+                //jObject.Add("phone", phone);
+                //jObject.Add("content", content);
+                //jObject.Add("time", time);
+                //return jObject.ToString();
+                return re;
             }
         }
-        public static CsvWriter csv;
+        //public static CsvWriter csv;
+        private static dynamic csvWriter;
         public static void Init(string savePath)
         {
-            TextWriter csvTextWriter = File.CreateText(savePath);
-            dynamic textWriter = TextWriter.Synchronized(csvTextWriter);
-            csv = new CsvWriter(textWriter);
-            csv.WriteHeader<SmsInfo>();
-            csv.WriteHeader(typeof(string));
-            csv.NextRecord();
+            //TextWriter csvTextWriter = File.CreateText(savePath);
+            //dynamic textWriter = TextWriter.Synchronized(csvTextWriter);
+            //csv = new CsvWriter(textWriter);
+            //csv.WriteHeader<SmsInfo>();
+            //csv.WriteHeader(String);
+            //csv.NextRecord();
+            StreamWriter writer = new StreamWriter(savePath, true);
+            csvWriter = StreamWriter.Synchronized(writer); 
         }
         public static void Close()
         {
-            csv.Dispose();
+            csvWriter.Close();
         }
         public static bool WriteRecord(string json)
         {
@@ -106,13 +111,15 @@ namespace alismstool
                 JArray array = JArray.Parse(json);
                 foreach (var item in array.Children())
                 {
-                    JObject jrow = JObject.Parse(json);
+                    JObject jrow = JObject.Parse(item.ToString());
                     SmsInfo smsRow = new SmsInfo();
                     smsRow.phone = (string)jrow["phone_number"];
                     smsRow.content = (string)jrow["content"];
                     smsRow.time = (string)jrow["send_time"];
-                    csv.WriteRecord(smsRow);
-                    csv.NextRecord();
+                    Console.WriteLine(smsRow.ToString());
+                    //csv.WriteRecord(smsRow);
+                    //csv.NextRecord();
+                    csvWriter.WriteLine(smsRow.ToString());
                 }
             }
             catch (Exception e)
