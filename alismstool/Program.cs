@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Data;
-using CsvHelper;
-using Newtonsoft.Json;
+﻿using CsvHelper;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.IO;
+using System.Net;
 
 namespace alismstool
 {
@@ -89,6 +87,10 @@ namespace alismstool
             Console.WriteLine("Enter Template Code:");
             templateCode = Console.ReadLine();
 
+            // Is Add To Needding Reply List
+            Console.WriteLine("Is add to need-reply list?[n]");
+            bool isAddToNeedReply = Console.ReadLine().ToLower() == "y";
+
             // Start sending message
             // get params list
             Console.WriteLine("Select Columns in Params (Use space to split)");
@@ -120,8 +122,18 @@ namespace alismstool
                     jObject.Add(column.ColumnName, new JValue(sendRow[column].ToString()));
                 }
                 string param = jObject.ToString();
+                // Send Message
                 if (SendSMS.Send(templateCode, phoneNumber, param) != 0)
                     errList.Add(phoneNumber);
+                // Add to Need Reply List
+                if (isAddToNeedReply)
+                {
+                    string url = ConfigurationManager.AppSettings["ReplyServerURL"];
+                    JObject needReplyJson = new JObject();
+                    needReplyJson.Add("phone_number", phoneNumber);
+                    needReplyJson.Add("send_time", DateTime.Now.ToString());
+                    HttpPost(url, needReplyJson.ToString());
+                }
             }
             Console.WriteLine("Finished");
             if (errList.Count != 0)
@@ -136,6 +148,27 @@ namespace alismstool
             Console.WriteLine("\nGet Return Method");
             SmsUp.GetSmsUp();
 
+        }
+        static string HttpPost(string url, string json)
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpWebRequest.ContentType = "application/json; charset=utf-8";
+            httpWebRequest.Method = "POST";
+            httpWebRequest.Accept = "application/json; charset=utf-8";
+
+            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                streamWriter.Write(json);
+                streamWriter.Flush();
+                streamWriter.Close();
+
+                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    return result;
+                }
+            }
         }
     }
 }
