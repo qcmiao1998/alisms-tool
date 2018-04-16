@@ -132,7 +132,12 @@ namespace alismstool
                     JObject needReplyJson = new JObject();
                     needReplyJson.Add("phone_number", phoneNumber);
                     needReplyJson.Add("send_time", DateTime.Now.ToString());
-                    HttpPost(url, needReplyJson.ToString());
+                    string returnJson = HttpPost(url, needReplyJson.ToString());
+                    JObject rJson = JObject.Parse(returnJson);
+                    if ((string)rJson["code"] != "0")
+                    {
+                        Console.WriteLine("Err when add to need reply list. " + phoneNumber);
+                    }
                 }
             }
             Console.WriteLine("Finished");
