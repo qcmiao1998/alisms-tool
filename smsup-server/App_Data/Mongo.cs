@@ -14,7 +14,7 @@ namespace smsup_server.Data
         public static void Init()
         {
             client = new MongoClient(ConfigurationManager.AppSettings["mongodb"]);
-            database = client.GetDatabase("smsdb");
+            database = client.GetDatabase(ConfigurationManager.AppSettings["dbname"]);
             upTable = database.GetCollection<SmsUp>("smsup");
             needReplyTable = database.GetCollection<NeedReply>("needreply");
         }
@@ -26,10 +26,11 @@ namespace smsup_server.Data
             sms.Time = DateTime.Parse(time);
             upTable.InsertOne(sms);
         }
-        public static void InsertNeedReply(string phone, string sendTime)
+        public static void InsertNeedReply(string phone, string name, string sendTime)
         {
             NeedReply needReply = new NeedReply();
             needReply.Phone = phone;
+            needReply.Name = name;
             needReply.IsReply = false;
             needReply.SendTime = DateTime.Parse(sendTime);
             needReplyTable.InsertOne(needReply);

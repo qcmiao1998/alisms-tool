@@ -7,6 +7,7 @@ namespace smsup_server.Models
     {
         public ObjectId _id { get; set; }
         public string Phone { get; set; }
+        public string Name { get; set; }
         public bool IsReply { get; set; }
         public DateTime SendTime { get; set; }
         public DateTime ReplyTime { get; set; }

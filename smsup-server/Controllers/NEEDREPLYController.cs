@@ -16,7 +16,7 @@ namespace smsup_server.Controllers
             {
                 string json = jsonr.ToString();
                 JObject jrow = JObject.Parse(json.ToString());
-                Data.Mongo.InsertNeedReply((string)jrow["phone_number"], (string)jrow["send_time"]);
+                Data.Mongo.InsertNeedReply((string)jrow["phone_number"], (string)jrow["name"],(string)jrow["send_time"]);
                 //returnJson = @"{""code"": 0, ""msg"": ""成功""}";
                 jObject.Add("code", 0);
                 jObject.Add("msg", "成功");

@@ -131,6 +131,14 @@ namespace alismstool
                     string url = ConfigurationManager.AppSettings["ReplyServerURL"];
                     JObject needReplyJson = new JObject();
                     needReplyJson.Add("phone_number", phoneNumber);
+                    if (sendList.Columns.Contains("name"))
+                    {
+                        needReplyJson.Add("name", sendRow["name"].ToString());
+                    }
+                    else
+                    {
+                        needReplyJson.Add("name", "");
+                    }
                     needReplyJson.Add("send_time", DateTime.Now.ToString());
                     string returnJson = HttpPost(url, needReplyJson.ToString());
                     JObject rJson = JObject.Parse(returnJson);
